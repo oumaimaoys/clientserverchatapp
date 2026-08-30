@@ -70,12 +70,18 @@ int main(){
     }
     std::cout << "awaiting client...\n";
 
-    while(server.accept_client()){
-        int client_socket = server.get_client_socket();
-
-        std::thread client_thread(handle_client, client_socket);
-        client_thread.detach();
-       
+    
+    bool flag = true;
+    while(flag){
+        int cli = server.accept_client();
+        if (cli >= 0){
+            server.get_clients_sockets().push_back(cli);
+            std::thread client_thread(handle_client, cli );
+            client_thread.detach();
+        }
+        else{
+            flag = false;
+        }
     }
 
    server.close_socket();

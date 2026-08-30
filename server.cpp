@@ -36,17 +36,17 @@ bool Server::start_listening(){
     return true;
 }
 
-bool Server::accept_client(){
-    this->client_socket = accept(l_socket, nullptr, nullptr);
-    return client_socket >= 0;
+int Server::accept_client(){
+    return accept(l_socket, nullptr, nullptr);
+    
 }
 
 void Server::close_socket(){
     close(l_socket);
 }
 
-int Server::get_client_socket() const {
-     return client_socket; 
+std::vector<int> Server::get_clients_sockets() const {
+    return connected_clients; 
 }
 
 int Server::get_server_socket(){
