@@ -1,0 +1,48 @@
+tcp
+we have client and server connected through in a lan
+the client knows where is the server using ip address + port
+127.0.0.1 is called loopback address
+tcp: transmission control protocol : provides a reliable byte stream between two endpoints
+
+what is a socket? interface your program uses to communicate through the network stack
+so the server has a listening socket that wait for incomming connections
+ad the client has a socket that connects to server
+after the client's connction is accepted the server has a socket specifically for the client messages 
+
+                 SERVER
+
+        Listening socket
+               │
+               │
+       waits for clients
+               │
+          ┌────┴────┐
+          ▼         ▼
+       Client A   Client B
+       socket     socket
+
+server side: 
+socket()
+   ↓
+bind()
+   ↓
+listen()
+   ↓
+accept()
+
+client side:
+socket()
+   ↓
+connect()
+
+TODO
+- split the mains
+1.
+   - remove it later.
+2. Make communication persistent and two-way.
+Instead of sending one fixed string and closing, loop:
+- Client: read a line from std::cin, send it.
+- Server: receive it, print it, then send a reply or broadcast it.
+- Add /quit so either side can exit cleanly.
+3. Define a real message protocol.
+TCP gives a continuous byte stream, not distinct messages. A good beginner approach is newline-delimited messages:
