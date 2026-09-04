@@ -21,8 +21,10 @@ public:
     int accept_client();
     void close_socket();
     sockaddr_in get_socket_address();
-    std::vector<int> get_clients_sockets() const;
+    std::vector<int>& get_clients_sockets();
+    
     int get_server_socket();
+    bool send_all(std::vector<int> clients_list, std::string msg);
 
 
 };

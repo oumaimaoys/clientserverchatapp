@@ -45,10 +45,19 @@ void Server::close_socket(){
     close(l_socket);
 }
 
-std::vector<int> Server::get_clients_sockets() const {
+std::vector<int>& Server::get_clients_sockets() {
     return connected_clients; 
 }
 
 int Server::get_server_socket(){
     return l_socket;
+}
+
+bool Server::send_all(std::vector<int> clients_list, std::string msg){
+    for (int client : clients_list){
+        if (send(client, msg.c_str(), msg.size(), 0) < 0 ){
+            return false;
+        }
+    }
+    return true;
 }

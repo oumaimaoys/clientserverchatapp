@@ -1,11 +1,13 @@
 #include <iostream>
 #include "server.h"
+
 #include <string>
 #include <thread>
+#include <functional>
 #include <unistd.h>
 
 
-void handle_client(int client_socket) {
+void handle_client(int client_socket, Server& server) {
     std::cout << "accepted client\n";
 
     while (true) {
@@ -20,6 +22,8 @@ void handle_client(int client_socket) {
 
         if (received == 0) {
             std::cout << "client disconnected\n";
+            std::vector<int> clients = server.get_clients_sockets();
+            clients.erase(std::remove(clients.begin(), clients.end(), client_socket), clients.end());
             break;
         }
 
@@ -28,15 +32,10 @@ void handle_client(int client_socket) {
             break;
         }
 
-        std::string reply = "Server received: " +
-                            std::string(buffer, received) +
+        std::string reply =  std::string(buffer, received) +
                             "\n";
 
-
-        if (send(client_socket, reply.c_str(), reply.size(), 0) < 0) {
-            perror("send");
-            break;
-        }
+        server.send_all(server.get_clients_sockets(), reply);
         std::cout << "Server received: ";
         std::cout.write(buffer, received);
         std::cout << '\n';
@@ -76,7 +75,7 @@ int main(){
         int cli = server.accept_client();
         if (cli >= 0){
             server.get_clients_sockets().push_back(cli);
-            std::thread client_thread(handle_client, cli );
+            std::thread client_thread(handle_client, cli,  std::ref(server));
             client_thread.detach();
         }
         else{

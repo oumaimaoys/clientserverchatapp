@@ -1,5 +1,6 @@
 #include <iostream>
 #include "client.h"
+#include "message.h"
 #include <cstring>
 #include <atomic>
 #include <thread>
@@ -11,7 +12,7 @@ void handle_input(int client_socket){
     while(running){
 
         std::cout << "Enter a message:\n";
-
+        
         std::string msg;
         if (!std::getline(std::cin, msg)) {
             running = false;
@@ -24,11 +25,12 @@ void handle_input(int client_socket){
             shutdown(client_socket, SHUT_RDWR);
             break;
         }
-        std::string wire_msg = msg + "\n";        
+        std::string wire_msg = msg + "\n";
+        Message message(std::time(nullptr), MessageType::CHAT, client_socket, wire_msg);
         ssize_t sent = send(
             client_socket,
-            wire_msg.c_str(),
-            wire_msg.size(),
+            message.serialize().c_str(),
+            message.serialize().size(),
             0
         );
 
@@ -63,9 +65,8 @@ void handle_incoming(int client_socket){
             running = false;
             break;
         }
-
-        std::cout.write(buffer, received);
-        std::cout << '\n';
+        Message message = Message::parse_message(buffer);
+        std::cout << message.get_content() + "\n";
     }
 }
 
