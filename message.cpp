@@ -1,9 +1,10 @@
 #include "message.h"
 
-Message::Message(time_t timestamp, MessageType type, int sender, std::string content){
+Message::Message(time_t timestamp, MessageType type, int sender, int receiver, std::string content){
     this->timestamp = timestamp;
     this->type = type;
     this->sender = sender;
+    this->reciever = receiver;
     this->content = content;
 }
 
@@ -40,7 +41,7 @@ std::string Message::serialize(){
         t = "unknown";
         break;
     }
-    return t + "|" + std::to_string(sender) + "|" + time_string + "|" + content;
+    return t + "|" + std::to_string(sender) + "|" + std::to_string(reciever) + "|" + time_string + "|" + content;
 }
 
 Message Message::parse_message(const std::string& msg){
@@ -50,6 +51,10 @@ Message Message::parse_message(const std::string& msg){
     std::string mesg = msg.substr(separator+1);
     separator = mesg.find("|");
     std::string sender = mesg.substr(0, separator);
+
+    mesg = msg.substr(separator+1);
+    separator = mesg.find("|");
+    std::string reciever = mesg.substr(0, separator);
 
     mesg = mesg.substr(separator+1);
     separator = mesg.find("|");
@@ -86,6 +91,7 @@ Message Message::parse_message(const std::string& msg){
     time_t tmp = std::mktime(&tm);
     
     int s = std::stoi(sender);
+    int r = std::stoi(reciever);
 
-    return Message(tmp, t, s, content);
+    return Message(tmp, t, s, r, content);
 }

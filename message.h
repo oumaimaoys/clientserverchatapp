@@ -21,10 +21,11 @@ private:
     time_t timestamp;
     MessageType type;
     int sender;
+    int reciever;
     std::string content;
 
 public:
-    Message(time_t timmestamp, MessageType type, int sender, std::string content);
+    Message(time_t timmestamp, MessageType type, int sender, int receiver, std::string content);
 
     std::string get_content();
     std::string serialize();

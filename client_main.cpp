@@ -8,7 +8,20 @@
 
 std::atomic<bool> running{true};
 
-void handle_input(int client_socket){
+// helpers
+bool read_integer(int& input){
+    
+    std::cin >> input;
+    if(std::cin.fail()){
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return false;
+    }
+    return true;
+
+}
+
+void handle_input(int client_socket, int receiver){
     while(running){
 
         std::cout << "Enter a message:\n";
@@ -26,7 +39,7 @@ void handle_input(int client_socket){
             break;
         }
         std::string wire_msg = msg + "\n";
-        Message message(std::time(nullptr), MessageType::CHAT, client_socket, wire_msg);
+        Message message(std::time(nullptr), MessageType::CHAT, client_socket, receiver, wire_msg);
         ssize_t sent = send(
             client_socket,
             message.serialize().c_str(),
@@ -92,7 +105,12 @@ int main(){
     }
 
     int client_socket = client.get_socket();
-    std::thread input_thread(handle_input, client_socket);
+
+    int receiver;
+    std::cout << "enter receiver id";
+    std::cin >> receiver;
+
+    std::thread input_thread(handle_input, client_socket, receiver);
     std::thread incoming_thread(handle_incoming, client_socket);
 
     input_thread.join();

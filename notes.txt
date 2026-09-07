@@ -36,15 +36,4 @@ socket()
 connect()
 
 TODO
-- split the mains
-1.
-   - remove it later.
-2. Make communication persistent and two-way.
-Instead of sending one fixed string and closing, loop:
-- Client: read a line from std::cin, send it.
-- Server: receive it, print it, then send a reply or broadcast it.
-- Add /quit so either side can exit cleanly.
-3. Define a real message protocol.
-TCP gives a continuous byte stream, not distinct messages. A good beginner approach is newline-delimited messages:
-
-Your next priority should be: use one shared server state for every handler thread, protect the real client list with a mutex, and remove a client from that list when its handler exits. After that, implement newline message parsing before relying on broadcast behavi
+- make client send diffente kind of messages
