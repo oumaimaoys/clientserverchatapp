@@ -28,6 +28,7 @@ public:
     Message(time_t timmestamp, MessageType type, int sender, int receiver, std::string content);
 
     std::string get_content();
+    int get_receiver() const;
     std::string serialize();
     static Message parse_message(const std::string& msg);
 

@@ -85,3 +85,12 @@ bool Server::send_all(std::vector<client_data> clients_list, std::string msg){
     }
     return true;
 }
+
+bool Server::send_to(int client_id, const std::string& msg){
+    for (const client_data& client : connected_clients){
+        if (client.client_id == client_id){
+            return send(client.client_socket, msg.c_str(), msg.size(), 0) >= 0;
+        }
+    }
+    return false;
+}

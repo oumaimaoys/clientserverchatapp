@@ -4,6 +4,8 @@
 #include <cstring>
 #include <atomic>
 #include <thread>
+#include <limits>
+#include <ctime>
 #include <sys/socket.h>
 
 std::atomic<bool> running{true};
@@ -37,6 +39,9 @@ void handle_input(int client_socket, int sender_id, int receiver){
             running = false;
             shutdown(client_socket, SHUT_RDWR);
             break;
+        }
+        if (msg.empty()) {
+            continue;
         }
         std::string wire_msg = msg + "\n";
         Message message(std::time(nullptr), MessageType::CHAT, sender_id, receiver, wire_msg);
@@ -78,7 +83,7 @@ void handle_incoming(int client_socket){
             running = false;
             break;
         }
-        Message message = Message::parse_message(buffer);
+        Message message = Message::parse_message(std::string(buffer, static_cast<std::size_t>(received)));
         std::cout << message.get_content() + "\n";
     }
 }
@@ -110,9 +115,15 @@ int main(){
     int client_socket = client.get_socket();
     std::cout << "assigned client id=" << client.get_id() << "\n";
 
+
+
     int receiver;
-    std::cout << "enter receiver id";
-    std::cin >> receiver;
+    std::cout << "enter receiver id: ";
+    if (!read_integer(receiver)) {
+        std::cout << "invalid receiver id\n";
+        return 1;
+    }
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     std::thread input_thread(handle_input, client_socket, client.get_id(), receiver);
     std::thread incoming_thread(handle_incoming, client_socket);

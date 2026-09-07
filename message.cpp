@@ -12,6 +12,10 @@ std::string Message::get_content(){
     return content;
 }
 
+int Message::get_receiver() const{
+    return reciever;
+}
+
 
 std::string Message::serialize(){
     char buffer[80];
@@ -45,22 +49,29 @@ std::string Message::serialize(){
 }
 
 Message Message::parse_message(const std::string& msg){
-    std::size_t separator = msg.find("|");
-    std::string type = msg.substr(0, separator);
+    std::string rest = msg;
+    while (!rest.empty() && (rest.back() == '\n' || rest.back() == '\r')) {
+        rest.pop_back();
+    }
 
-    std::string mesg = msg.substr(separator+1);
-    separator = mesg.find("|");
-    std::string sender = mesg.substr(0, separator);
+    auto take_field = [&rest](std::string& field) {
+        std::size_t separator = rest.find("|");
+        if (separator == std::string::npos) {
+            return false;
+        }
+        field = rest.substr(0, separator);
+        rest = rest.substr(separator + 1);
+        return true;
+    };
 
-    mesg = msg.substr(separator+1);
-    separator = mesg.find("|");
-    std::string reciever = mesg.substr(0, separator);
-
-    mesg = mesg.substr(separator+1);
-    separator = mesg.find("|");
-    std::string timestamp = mesg.substr(0, separator);
-
-    std::string content = mesg.substr(separator+1);
+    std::string type;
+    std::string sender;
+    std::string reciever;
+    std::string timestamp;
+    if (!take_field(type) || !take_field(sender) || !take_field(reciever) || !take_field(timestamp)) {
+        return Message(0, MessageType::UNKNOWN, 0, 0, msg);
+    }
+    std::string content = rest;
 
     MessageType t;
     if( type == "login"){
@@ -89,9 +100,15 @@ Message Message::parse_message(const std::string& msg){
     ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
 
     time_t tmp = std::mktime(&tm);
-    
-    int s = std::stoi(sender);
-    int r = std::stoi(reciever);
+
+    int s = 0;
+    int r = 0;
+    try {
+        s = std::stoi(sender);
+        r = std::stoi(reciever);
+    } catch (...) {
+        return Message(0, MessageType::UNKNOWN, 0, 0, msg);
+    }
 
     return Message(tmp, t, s, r, content);
 }

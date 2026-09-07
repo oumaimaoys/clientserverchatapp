@@ -34,6 +34,7 @@ public:
     
     int get_server_socket();
     bool send_all(std::vector<client_data> clients_list, std::string msg);
+    bool send_to(int client_id, const std::string& msg);
 
 
 };

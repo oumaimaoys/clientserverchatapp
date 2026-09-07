@@ -1,5 +1,6 @@
 #include <iostream>
 #include "server.h"
+#include "message.h"
 
 #include <string>
 #include <thread>
@@ -44,13 +45,16 @@ void handle_client(client_data client, Server& server) {
             break;
         }
 
-        std::string reply =  std::string(buffer, received) +
-                            "\n";
+        std::string raw(buffer, static_cast<std::size_t>(received));
+        Message message = Message::parse_message(raw);
+        int dest = message.get_receiver();
 
-        server.send_all(server.get_clients_sockets(), reply);
-        std::cout << "Server received: ";
-        std::cout.write(buffer, received);
-        std::cout << '\n';
+        std::cout << "Server received from id=" << client.client_id
+                  << " to id=" << dest << ": " << message.get_content() << '\n';
+
+        if (!server.send_to(dest, message.serialize())) {
+            std::cout << "unknown receiver id=" << dest << '\n';
+        }
     }
 
     close(client_socket);
