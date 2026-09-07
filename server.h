@@ -6,11 +6,20 @@
 #include <arpa/inet.h>
 #include <vector>
 
+struct client_data
+{
+    int client_socket;
+    int client_id;
+    std::string address;
+};
+
+
 class Server {
 private:
     sockaddr_in socket_address{};
     int l_socket; // listening socket
-    std::vector<int> connected_clients;
+    int next_client_id;
+    std::vector<client_data> connected_clients;
 
 public:
     Server();
@@ -18,13 +27,13 @@ public:
     bool create_socket();
     bool bind_address();
     bool start_listening();
-    int accept_client();
+    client_data accept_client();
     void close_socket();
     sockaddr_in get_socket_address();
-    std::vector<int>& get_clients_sockets();
+    std::vector<client_data>& get_clients_sockets();
     
     int get_server_socket();
-    bool send_all(std::vector<int> clients_list, std::string msg);
+    bool send_all(std::vector<client_data> clients_list, std::string msg);
 
 
 };

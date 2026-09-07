@@ -21,7 +21,7 @@ bool read_integer(int& input){
 
 }
 
-void handle_input(int client_socket, int receiver){
+void handle_input(int client_socket, int sender_id, int receiver){
     while(running){
 
         std::cout << "Enter a message:\n";
@@ -39,7 +39,7 @@ void handle_input(int client_socket, int receiver){
             break;
         }
         std::string wire_msg = msg + "\n";
-        Message message(std::time(nullptr), MessageType::CHAT, client_socket, receiver, wire_msg);
+        Message message(std::time(nullptr), MessageType::CHAT, sender_id, receiver, wire_msg);
         ssize_t sent = send(
             client_socket,
             message.serialize().c_str(),
@@ -95,8 +95,6 @@ int main(){
 
     bool connection = client.connect_to_server("127.0.0.1", 5000);
 
-    
-
     if(connection){
         std::cout << "Established connection!!\n";
     }
@@ -104,13 +102,19 @@ int main(){
         return 1;
     }
 
+    if (!client.receive_assigned_id()) {
+        std::cout << "failed to receive client id\n";
+        return 1;
+    }
+
     int client_socket = client.get_socket();
+    std::cout << "assigned client id=" << client.get_id() << "\n";
 
     int receiver;
     std::cout << "enter receiver id";
     std::cin >> receiver;
 
-    std::thread input_thread(handle_input, client_socket, receiver);
+    std::thread input_thread(handle_input, client_socket, client.get_id(), receiver);
     std::thread incoming_thread(handle_incoming, client_socket);
 
     input_thread.join();

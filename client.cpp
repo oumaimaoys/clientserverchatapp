@@ -1,8 +1,11 @@
 #include "client.h"
 #include <sys/socket.h>
 #include <unistd.h>
+#include <cstdint>
 
 Client::Client(){
+    c_socket = -1;
+    client_id = 0;
 }
 
 
@@ -28,6 +31,16 @@ bool Client::connect_to_server(std::string server_ip, int port){
     return true;
 }
 
+bool Client::receive_assigned_id(){
+    uint32_t net_id = 0;
+    ssize_t n = recv(c_socket, &net_id, sizeof(net_id), MSG_WAITALL);
+    if (n != static_cast<ssize_t>(sizeof(net_id))) {
+        return false;
+    }
+    client_id = static_cast<int>(ntohl(net_id));
+    return true;
+}
+
 void Client::close_connection(){
     close(c_socket);
 }
@@ -36,3 +49,6 @@ int Client::get_socket(){
     return c_socket; 
 }
 
+int Client::get_id() const{
+    return client_id;
+}

@@ -5,10 +5,13 @@
 #include <thread>
 #include <functional>
 #include <unistd.h>
+#include <algorithm>
 
 
-void handle_client(int client_socket, Server& server) {
-    std::cout << "accepted client\n";
+void handle_client(client_data client, Server& server) {
+    int client_socket = client.client_socket;
+    std::cout << "accepted client id=" << client.client_id
+              << " address=" << client.address << "\n";
 
     while (true) {
         char buffer[1024];
@@ -22,8 +25,17 @@ void handle_client(int client_socket, Server& server) {
 
         if (received == 0) {
             std::cout << "client disconnected\n";
-            std::vector<int> clients = server.get_clients_sockets();
-            clients.erase(std::remove(clients.begin(), clients.end(), client_socket), clients.end());
+            auto& clients = server.get_clients_sockets();
+            clients.erase(
+                std::remove_if(
+                    clients.begin(),
+                    clients.end(),
+                    [client_socket](const client_data& c) {
+                        return c.client_socket == client_socket;
+                    }
+                ),
+                clients.end()
+            );
             break;
         }
 
@@ -72,10 +84,9 @@ int main(){
     
     bool flag = true;
     while(flag){
-        int cli = server.accept_client();
-        if (cli >= 0){
-            server.get_clients_sockets().push_back(cli);
-            std::thread client_thread(handle_client, cli,  std::ref(server));
+        client_data cli = server.accept_client();
+        if (cli.client_socket >= 0){
+            std::thread client_thread(handle_client, cli, std::ref(server));
             client_thread.detach();
         }
         else{

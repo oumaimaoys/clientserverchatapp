@@ -1,8 +1,10 @@
 #include "server.h"
 #include <sys/socket.h>
 #include <unistd.h>
+#include <cstdint>
 
 Server::Server(){
+    next_client_id = 1;
     socket_address.sin_family = AF_INET; // sets family of ip to ipv4
     socket_address.sin_port = htons(5000); // sets port to 5000 and turn port number to network byte order
     inet_pton(AF_INET, "127.0.0.1", &socket_address.sin_addr); // turn ip address to binary form
@@ -36,16 +38,38 @@ bool Server::start_listening(){
     return true;
 }
 
-int Server::accept_client(){
-    return accept(l_socket, nullptr, nullptr);
-    
+client_data Server::accept_client(){
+    client_data data{};
+    data.client_socket = -1;
+    data.client_id = 0;
+
+    sockaddr_in peer{};
+    socklen_t peer_len = sizeof(peer);
+    int fd = accept(l_socket, reinterpret_cast<sockaddr*>(&peer), &peer_len);
+    if (fd < 0) {
+        return data;
+    }
+
+    char ip[INET_ADDRSTRLEN]{};
+    inet_ntop(AF_INET, &peer.sin_addr, ip, sizeof(ip));
+
+    data.client_socket = fd;
+    data.client_id = next_client_id++;
+    data.address = std::string(ip) + ":" + std::to_string(ntohs(peer.sin_port));
+
+    connected_clients.push_back(data);
+
+    uint32_t net_id = htonl(static_cast<uint32_t>(data.client_id));
+    send(fd, &net_id, sizeof(net_id), 0);
+
+    return data;
 }
 
 void Server::close_socket(){
     close(l_socket);
 }
 
-std::vector<int>& Server::get_clients_sockets() {
+std::vector<client_data>& Server::get_clients_sockets() {
     return connected_clients; 
 }
 
@@ -53,9 +77,9 @@ int Server::get_server_socket(){
     return l_socket;
 }
 
-bool Server::send_all(std::vector<int> clients_list, std::string msg){
-    for (int client : clients_list){
-        if (send(client, msg.c_str(), msg.size(), 0) < 0 ){
+bool Server::send_all(std::vector<client_data> clients_list, std::string msg){
+    for (client_data client : clients_list){
+        if (send(client.client_socket, msg.c_str(), msg.size(), 0) < 0 ){
             return false;
         }
     }
