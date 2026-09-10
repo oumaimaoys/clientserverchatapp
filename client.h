@@ -9,6 +9,7 @@ class Client {
 private:
     int c_socket;
     int client_id;
+    std::string username;
 
 public:
     Client();
@@ -19,6 +20,7 @@ public:
     void close_connection();
     int get_socket();
     int get_id() const;
+    bool update_username(std::string username);
 
 
 

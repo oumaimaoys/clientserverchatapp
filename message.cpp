@@ -8,12 +8,27 @@ Message::Message(time_t timestamp, MessageType type, int sender, int receiver, s
     this->content = content;
 }
 
+
+
 std::string Message::get_content(){
     return content;
 }
 
+bool Message::set_content(std::string chat){
+    this->content = chat;
+    return true;
+}
+
+int Message::get_sender() const{
+    return sender;
+}
+
 int Message::get_receiver() const{
     return reciever;
+}
+
+MessageType Message::get_type() const {
+    return type;
 }
 
 
@@ -45,7 +60,7 @@ std::string Message::serialize(){
         t = "unknown";
         break;
     }
-    return t + "|" + std::to_string(sender) + "|" + std::to_string(reciever) + "|" + time_string + "|" + content;
+    return t + "|" + std::to_string(sender) + "|" + std::to_string(reciever) + "|" + time_string + "|" + content + "\n";
 }
 
 Message Message::parse_message(const std::string& msg){

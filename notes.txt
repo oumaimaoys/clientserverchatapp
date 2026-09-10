@@ -37,3 +37,6 @@ connect()
 
 TODO
 - make client send diffente kind of messages
+
++--Connected clients:--+
+| - User #

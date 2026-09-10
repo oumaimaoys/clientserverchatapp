@@ -43,15 +43,37 @@ void handle_client(client_data client, Server& server) {
         if (received < 0) {
             perror("recv");
             break;
-        }
+        }        
 
         std::string raw(buffer, static_cast<std::size_t>(received));
         Message message = Message::parse_message(raw);
         int dest = message.get_receiver();
 
-        std::cout << "Server received from id=" << client.client_id
-                  << " to id=" << dest << ": " << message.get_content() << '\n';
+        // handle list users command
+        std::string message_to_send="+--Connected clients:--+\n";
+        if (message.get_type() == MessageType::LIST_USERS){
+            for( client_data cli: server.get_clients_sockets()){
+                message_to_send += "| - User #" + std::to_string(cli.client_id) + "\n";
+            }
+            message_to_send += "-------------------\n";
+            message.set_content(message_to_send);
+        }
 
+        // handle update username command
+
+        if (message.get_type() == MessageType::CHANGE_USERNAME){
+            std::vector<client_data> clients_list = server.get_clients_sockets();
+            for (client_data& cli : clients_list){
+                if (cli.client_id == message.get_sender()){
+                    cli.username = message.get_content();
+                    break;
+                }
+            }
+            message_to_send = "Success updating username!";
+            message.set_content(message_to_send);
+        }
+
+        
         if (!server.send_to(dest, message.serialize())) {
             std::cout << "unknown receiver id=" << dest << '\n';
         }

@@ -10,6 +10,7 @@ struct client_data
 {
     int client_socket;
     int client_id;
+    std::string username;
     std::string address;
 };
 

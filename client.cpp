@@ -52,3 +52,8 @@ int Client::get_socket(){
 int Client::get_id() const{
     return client_id;
 }
+
+bool Client::update_username(std::string username){
+    this->username = username;
+    return true;
+}

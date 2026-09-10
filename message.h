@@ -25,10 +25,13 @@ private:
     std::string content;
 
 public:
-    Message(time_t timmestamp, MessageType type, int sender, int receiver, std::string content);
+    Message(time_t timestamp, MessageType type, int sender,  int receiver = -1, std::string content = "");
 
     std::string get_content();
+    bool set_content(std::string text);
     int get_receiver() const;
+    int get_sender() const;
+    MessageType get_type() const;
     std::string serialize();
     static Message parse_message(const std::string& msg);
 
