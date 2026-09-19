@@ -23,7 +23,7 @@ private:
     std::vector<client_data> connected_clients;
 
 public:
-    Server();
+    Server(int port);
 
     bool create_socket();
     bool bind_address();

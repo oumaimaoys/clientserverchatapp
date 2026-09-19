@@ -3,11 +3,11 @@
 #include <unistd.h>
 #include <cstdint>
 
-Server::Server(){
+Server::Server(int port){
     next_client_id = 1;
     socket_address.sin_family = AF_INET; // sets family of ip to ipv4
-    socket_address.sin_port = htons(5000); // sets port to 5000 and turn port number to network byte order
-    inet_pton(AF_INET, "127.0.0.1", &socket_address.sin_addr); // turn ip address to binary form
+    socket_address.sin_port = htons(port); // sets port to 5000 and turn port number to network byte order
+    socket_address.sin_addr.s_addr = INADDR_ANY;
 }
 
 sockaddr_in Server::get_socket_address(){

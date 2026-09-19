@@ -84,7 +84,7 @@ void handle_client(client_data client, Server& server) {
 }
 
 int main(){
-    Server server;
+    Server server(5000);
     if (server.create_socket()){
         std::cout << "Server Socket created successfully\n";
     }

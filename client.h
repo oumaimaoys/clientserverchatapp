@@ -15,7 +15,7 @@ public:
     Client();
 
     bool create_socket();
-    bool connect_to_server(std::string server_ip, int port);
+    bool connect_to_server(const std::string& server_ip, int port);
     bool receive_assigned_id();
     void close_connection();
     int get_socket();
